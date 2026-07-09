@@ -1,0 +1,54 @@
+# Reading C:/intelFPGA_lite/17.0/modelsim_ase/tcl/vsim/pref.tcl
+vsim work.connect4_testbench
+# vsim work.connect4_testbench 
+# Start time: 15:43:27 on Jun 02,2026
+# Loading sv_std.std
+# Loading work.connect4_testbench
+# Loading work.game_controller
+# Loading work.win_detector
+# Loading work.board_renderer
+# Trace back: Error QStructure::sort: invalid command name ""
+#   <6:proc:11: ::QStructure::sort .main_pane.structure 0 ascending
+#   <5:eval:1: ::QStructure::structsort .main_pane.structure 0 ascending
+#   <4:eval:1: ::namespace inscope ::QStructure {structsort .main_pane.structure} 0 ascending
+#   >3:proc:26: ::.main_pane.structure.interior.cs.body.struct sort 0 ascending
+#   >2:proc:10: ::.main_pane.structure.interior.cs.body.struct _initializeSortColumn
+#   <1:eval:1: ::namespace inscope ::vsimwidgets::Hierarchy {::.main_pane.structure.interior.cs.body.struct _initializeSortColumn}
+vsim work.connect4_testbench
+# End time: 15:43:43 on Jun 02,2026, Elapsed time: 0:00:16
+# Errors: 14, Warnings: 0
+# vsim work.connect4_testbench 
+# Start time: 15:43:43 on Jun 02,2026
+# Loading sv_std.std
+# Loading work.connect4_testbench
+# Loading work.game_controller
+# Loading work.win_detector
+# Loading work.board_renderer
+add wave -position end  sim:/connect4_testbench/PERIOD
+add wave -position end  sim:/connect4_testbench/clk
+add wave -position end  sim:/connect4_testbench/reset
+add wave -position end  sim:/connect4_testbench/tick
+add wave -position end  sim:/connect4_testbench/ev_left
+add wave -position end  sim:/connect4_testbench/ev_right
+add wave -position end  sim:/connect4_testbench/ev_drop
+add wave -position end  sim:/connect4_testbench/board
+add wave -position end  sim:/connect4_testbench/cursor_col
+add wave -position end  sim:/connect4_testbench/current_player
+add wave -position end  sim:/connect4_testbench/game_won
+add wave -position end  sim:/connect4_testbench/game_draw
+add wave -position end  sim:/connect4_testbench/winner
+add wave -position end  sim:/connect4_testbench/falling_active
+add wave -position end  sim:/connect4_testbench/falling_row
+add wave -position end  sim:/connect4_testbench/falling_col
+add wave -position end  sim:/connect4_testbench/falling_player
+add wave -position end  sim:/connect4_testbench/RedPixels
+add wave -position end  sim:/connect4_testbench/GrnPixels
+add wave -position end  sim:/connect4_testbench/play_col
+add wave -position end  sim:/connect4_testbench/move_index
+add wave -position end  sim:/connect4_testbench/step
+run -all
+# ** Note: $stop    : connect4_testbench.sv(85)
+#    Time: 3685 ps  Iteration: 1  Instance: /connect4_testbench
+# Break in Module connect4_testbench at connect4_testbench.sv line 85
+# End time: 17:24:00 on Jun 02,2026, Elapsed time: 1:40:17
+# Errors: 0, Warnings: 0

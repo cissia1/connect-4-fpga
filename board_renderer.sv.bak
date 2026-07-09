@@ -1,0 +1,50 @@
+// Paints the 6x7 Connect 4 board onto the 16x16 bicolor LED display.
+// Player 1 pieces are red, Player 2 pieces are green. The falling piece is
+// overlaid in its column, and a drop cursor sits two rows above the grid.
+module board_renderer (board, cursor_col, current_player, show_cursor,
+                       falling_active, falling_row, falling_col, falling_player,
+                       RedPixels, GrnPixels);
+    input  logic [5:0][6:0][1:0] board;
+    input  logic [2:0]           cursor_col;
+    input  logic                 current_player, show_cursor;
+    input  logic                 falling_active;
+    input  logic [2:0]           falling_row, falling_col;
+    input  logic                 falling_player;
+    output logic [15:0][15:0]    RedPixels, GrnPixels;
+
+    // Where the grid sits on the display. Column c -> COL_OFF + c,
+    // board row r (0 = bottom) -> ROW_OFF + (5 - r), so gravity points down.
+    parameter COL_OFF = 4;   // columns 4..10
+    parameter ROW_OFF = 5;   // rows 5..10
+
+    logic [1:0] cval;
+    integer r, c, dr, dc;
+
+    always_comb begin
+        RedPixels = '0;
+        GrnPixels = '0;
+
+        for (r = 0; r < 6; r = r + 1) begin
+            for (c = 0; c < 7; c = c + 1) begin
+                cval = board[r][c];
+                // overlay the falling piece on its cell
+                if (falling_active && falling_row == r && falling_col == c) begin
+                    if (falling_player == 1'b0) cval = 2'b01;
+                    else cval = 2'b10;
+                end
+
+                dr = ROW_OFF + (5 - r);
+                dc = COL_OFF + c;
+                if (cval == 2'b01) RedPixels[dr][dc] = 1'b1;
+                else if (cval == 2'b10) GrnPixels[dr][dc] = 1'b1;
+            end
+        end
+
+        // drop cursor, in the current player's color
+        if (show_cursor) begin
+            dc = COL_OFF + cursor_col;
+            if (current_player == 1'b0) RedPixels[3][dc] = 1'b1;
+            else GrnPixels[3][dc] = 1'b1;
+        end
+    end
+endmodule

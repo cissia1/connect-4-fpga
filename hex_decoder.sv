@@ -1,0 +1,31 @@
+module hex_decoder (d, seg);
+    input  logic [3:0] d;
+    output logic [6:0] seg;
+
+    always_comb begin
+        case (d)
+            4'd1: seg = 7'b1111001;
+            4'd2: seg = 7'b0100100;
+            4'd3: seg = 7'b0110000;
+            4'd4: seg = 7'b0011001;
+            4'd5: seg = 7'b0010010;
+            4'd6: seg = 7'b0000010;
+            4'd7: seg = 7'b1111000;
+            default: seg = 7'b1111111;
+        endcase
+    end
+endmodule
+
+module hex_decoder_testbench;
+    logic [3:0] d;
+    logic [6:0] seg;
+    hex_decoder dut (.d, .seg);
+
+    integer i;
+    initial begin
+        for (i = 0; i < 16; i = i + 1) begin
+            d = i; #10;
+        end
+        $stop;
+    end
+endmodule

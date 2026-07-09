@@ -1,0 +1,105 @@
+module win_detector (board, win_p1, win_p2);
+    input  logic [5:0][6:0][1:0] board;
+    output logic win_p1, win_p2;
+    integer board_row, board_col;
+    always_comb begin
+        win_p1 = 1'b0;
+        win_p2 = 1'b0;
+        //horizontal
+        for (board_row = 0; board_row < 6; board_row = board_row + 1)
+            for (board_col = 0; board_col < 4; board_col = board_col + 1)
+                if (board[board_row][board_col] != 2'b00 &&
+                    board[board_row][board_col] == board[board_row][board_col+1] &&
+                    board[board_row][board_col] == board[board_row][board_col+2] &&
+                    board[board_row][board_col] == board[board_row][board_col+3]) begin
+                    if (board[board_row][board_col] == 2'b01)
+							win_p1 = 1'b1;
+                    else if (board[board_row][board_col] == 2'b10) 
+							win_p2 = 1'b1;
+                end
+        //vertical
+        for (board_row = 0; board_row < 3; board_row = board_row + 1)
+            for (board_col = 0; board_col < 7; board_col = board_col + 1)
+                if (board[board_row][board_col] != 2'b00 &&
+                    board[board_row][board_col] == board[board_row+1][board_col] &&
+                    board[board_row][board_col] == board[board_row+2][board_col] &&
+                    board[board_row][board_col] == board[board_row+3][board_col]) begin
+                    if (board[board_row][board_col] == 2'b01) 
+							win_p1 = 1'b1;
+                    else if (board[board_row][board_col] == 2'b10) 
+							win_p2 = 1'b1;
+                end
+        //diagonal up and right
+        for (board_row = 0; board_row < 3; board_row = board_row + 1)
+            for (board_col = 0; board_col < 4; board_col = board_col + 1)
+                if (board[board_row][board_col] != 2'b00 &&
+                    board[board_row][board_col] == board[board_row+1][board_col+1] &&
+                    board[board_row][board_col] == board[board_row+2][board_col+2] &&
+                    board[board_row][board_col] == board[board_row+3][board_col+3]) begin
+                    if (board[board_row][board_col] == 2'b01) 
+							win_p1 = 1'b1;
+                    else if (board[board_row][board_col] == 2'b10) 
+							win_p2 = 1'b1;
+                end
+        //diagonal down and right
+        for (board_row = 3; board_row < 6; board_row = board_row + 1)
+            for (board_col = 0; board_col < 4; board_col = board_col + 1)
+                if (board[board_row][board_col] != 2'b00 &&
+                    board[board_row][board_col] == board[board_row-1][board_col+1] &&
+                    board[board_row][board_col] == board[board_row-2][board_col+2] &&
+                    board[board_row][board_col] == board[board_row-3][board_col+3]) begin
+                    if (board[board_row][board_col] == 2'b01) 
+							win_p1 = 1'b1;
+                    else if (board[board_row][board_col] == 2'b10) 
+							win_p2 = 1'b1;
+                end
+    end
+endmodule
+
+module win_detector_testbench;
+    logic [5:0][6:0][1:0] board;
+    logic win_p1, win_p2;
+    win_detector dut (.board, .win_p1, .win_p2);
+
+    initial begin
+        board = '0;
+        #10;
+
+        board[0][0] = 2'b01; board[0][1] = 2'b01; board[0][2] = 2'b01;
+        #10;
+
+        board[0][3] = 2'b01;
+        #10;
+
+        board = '0;
+        board[2][3] = 2'b10; board[2][4] = 2'b10; board[2][5] = 2'b10; board[2][6] = 2'b10;
+        #10;
+
+        board = '0;
+        board[0][0] = 2'b01; board[1][0] = 2'b01; board[2][0] = 2'b01; board[3][0] = 2'b01;
+        #10;
+
+        board = '0;
+        board[2][6] = 2'b10; board[3][6] = 2'b10; board[4][6] = 2'b10; board[5][6] = 2'b10;
+        #10;
+
+        board = '0;
+        board[0][0] = 2'b01; board[1][1] = 2'b01; board[2][2] = 2'b01; board[3][3] = 2'b01;
+        #10;
+
+        board = '0;
+        board[5][0] = 2'b10; board[4][1] = 2'b10; board[3][2] = 2'b10; board[2][3] = 2'b10;
+        #10;
+
+        board = '0;
+        board[0][0] = 2'b01; board[0][1] = 2'b01; board[0][2] = 2'b10;
+        board[0][3] = 2'b01; board[0][4] = 2'b01;
+        #10;
+
+        board = '0;
+        board[0][0] = 2'b01; board[0][1] = 2'b01; board[0][2] = 2'b01; board[0][3] = 2'b01;
+        board[5][3] = 2'b10; board[5][4] = 2'b10; board[5][5] = 2'b10; board[5][6] = 2'b10;
+        #10;
+        $stop;
+    end
+endmodule

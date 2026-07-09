@@ -1,0 +1,123 @@
+// Connect 4 game FSM. Holds the 6x7 board, the active player, the column
+// cursor, and the falling-piece animation. Cells are encoded 00 = empty,
+// 01 = Player 1, 10 = Player 2. ev_* are one-cycle button pulses and tick
+// is the slow animation/step enable.
+module game_controller (clk, reset, tick, ev_left, ev_right, ev_drop,
+                        board, cursor_col, current_player,
+                        game_won, game_draw, winner,
+                        falling_active, falling_row, falling_col, falling_player);
+    input  logic clk, reset, tick;
+    input  logic ev_left, ev_right, ev_drop;
+    output logic [5:0][6:0][1:0] board;          // [row][col]
+    output logic [2:0] cursor_col;               // 0..6
+    output logic current_player;                 // 0 = P1, 1 = P2
+    output logic game_won, game_draw;
+    output logic winner;                         // valid when game_won; 0 = P1, 1 = P2
+    output logic falling_active;
+    output logic [2:0] falling_row, falling_col;
+    output logic falling_player;
+
+    enum {S_TURN, S_DROP, S_CHECK, S_WIN, S_DRAW} state;
+
+    // four-in-a-row check on the current board
+    logic win_p1, win_p2;
+    win_detector wd (.board, .win_p1, .win_p2);
+
+    // lowest empty row of the cursor column (where a new piece comes to rest)
+    logic [2:0] rest_row;
+    logic col_not_full, found;
+    integer i;
+    always_comb begin
+        rest_row = 3'd0;
+        found = 1'b0;
+        for (i = 0; i < 6; i = i + 1) begin
+            if (~found && board[i][cursor_col] == 2'b00) begin
+                rest_row = i;
+                found = 1'b1;
+            end
+        end
+        col_not_full = found;
+    end
+
+    // board full -> draw
+    logic board_full;
+    integer fr, fc;
+    always_comb begin
+        board_full = 1'b1;
+        for (fr = 0; fr < 6; fr = fr + 1)
+            for (fc = 0; fc < 7; fc = fc + 1)
+                if (board[fr][fc] == 2'b00) board_full = 1'b0;
+    end
+
+    assign game_won  = (state == S_WIN);
+    assign game_draw = (state == S_DRAW);
+
+    integer rr, cc;
+    always_ff @(posedge clk) begin
+        if (reset) begin
+            state          <= S_TURN;
+            cursor_col     <= 3'd3;       // start in the middle
+            current_player <= 1'b0;       // P1 first
+            winner         <= 1'b0;
+            falling_active <= 1'b0;
+            falling_row    <= 3'd0;
+            falling_col    <= 3'd0;
+            falling_player <= 1'b0;
+            for (rr = 0; rr < 6; rr = rr + 1)
+                for (cc = 0; cc < 7; cc = cc + 1)
+                    board[rr][cc] <= 2'b00;
+        end
+        else begin
+            case (state)
+                S_TURN: begin
+                    falling_active <= 1'b0;
+                    if (ev_left && cursor_col != 3'd0)
+                        cursor_col <= cursor_col - 3'd1;
+                    else if (ev_right && cursor_col != 3'd6)
+                        cursor_col <= cursor_col + 3'd1;
+                    if (ev_drop && col_not_full) begin
+                        falling_active <= 1'b1;
+                        falling_row    <= 3'd5;   // start at the top
+                        falling_col    <= cursor_col;
+                        falling_player <= current_player;
+                        state          <= S_DROP;
+                    end
+                end
+
+                S_DROP: begin
+                    if (tick) begin
+                        if (falling_row > rest_row)
+                            falling_row <= falling_row - 3'd1;
+                        else begin
+                            // piece has landed - write it into the board
+                            if (current_player == 1'b0) board[rest_row][falling_col] <= 2'b01;
+                            else board[rest_row][falling_col] <= 2'b10;
+                            falling_active <= 1'b0;
+                            state <= S_CHECK;
+                        end
+                    end
+                end
+
+                S_CHECK: begin
+                    if (win_p1) begin
+                        winner <= 1'b0;
+                        state  <= S_WIN;
+                    end
+                    else if (win_p2) begin
+                        winner <= 1'b1;
+                        state  <= S_WIN;
+                    end
+                    else if (board_full) state <= S_DRAW;
+                    else begin
+                        current_player <= ~current_player;
+                        state          <= S_TURN;
+                    end
+                end
+
+                S_WIN:   state <= S_WIN;    // wait for reset
+                S_DRAW:  state <= S_DRAW;   // wait for reset
+                default: state <= S_TURN;
+            endcase
+        end
+    end
+endmodule
